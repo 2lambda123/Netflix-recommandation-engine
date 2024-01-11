@@ -8,12 +8,18 @@ sudo apt-get update || { echo 'Error during package update' >> setup.log }
 # Install and initiate virtual env
 sudo apt-get install -y python3 python3-pip python3-venv
 # Go to app folder
-python3 -m venv venv --clear || { echo 'Error during virtual environment setup' >> setup.log }
+if ! python3 -m venv venv --clear; then
+    echo 'Error during virtual environment setup' >> setup.log
+    exit 1
+fi
 source venv/bin/activate
 pip install -r requirements.txt
-# Copy your flask App in a new folder at the root /home/ubuntu
+# Copy your flask App in a new folder at the root /home/ubuntu. Replace 'your-flask-app-folder' with the name of your Flask app folder.
 # Unicorn 
-pip install gunicorn || { echo 'Error during Gunicorn installation' >> setup.log }
+if ! pip install gunicorn; then
+    echo 'Error during Gunicorn installation' >> setup.log
+    exit 1
+fi
 gunicorn -w 4 -b 0.0.0.0:8000 main:app || { echo 'Error during the server setup' >> setup.log }
 # Set inbound rule in security group to autorize access to port 8000 on your EC2 instance 
 # If error when running this command : "[3612] [ERROR] Connection in use: ('0.0.0.0', 8000)"
